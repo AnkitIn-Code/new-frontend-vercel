@@ -2,7 +2,7 @@ import React, { useEffect, useState, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { rolePermissions, actionLabels } from '../config/rolesConfig';
-import { apiUrl } from '../config/api';
+import { apiUrl, authFetch } from '../config/api';
 import './AdminDashboard.css';
 
 const AdminDashboard = () => {
@@ -11,19 +11,19 @@ const AdminDashboard = () => {
   const [requests, setRequests] = useState([]);
   const [loadingUsers, setLoadingUsers] = useState(false);
   const [usersError, setUsersError] = useState('');
-  const authToken = user?.token; // adjust if token lives elsewhere (e.g. context)
+  // Prefer reading token from localStorage (set by login). user?.token may not exist.
+  const authToken = (() => {
+    try {
+      return localStorage.getItem('authToken');
+    } catch (e) {
+      return null;
+    }
+  })();
 
   const loadUsers = useCallback(() => {
     setLoadingUsers(true);
     setUsersError('');
-    fetch(apiUrl('/api/users'), {
-      method: 'GET',
-      headers: {
-        'Content-Type': 'application/json',
-        ...(authToken ? { Authorization: `Bearer ${authToken}` } : {})
-      },
-      credentials: 'include'
-    })
+    authFetch('/api/users', { method: 'GET' })
       .then(r => {
         if (!r.ok) throw new Error('Failed to load users');
         return r.json();

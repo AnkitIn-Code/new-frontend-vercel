@@ -24,7 +24,15 @@ export const AuthProvider = ({ children }) => {
 
   const checkAuth = async () => {
     try {
-  const response = await axiosInstance.get('/api/auth/me');
+      // If there's no token in localStorage, skip calling protected endpoint
+      const token = localStorage.getItem('authToken');
+      if (!token) {
+        setUser(null);
+        setLoading(false);
+        return;
+      }
+
+      const response = await axiosInstance.get('/api/auth/me');
       setUser(response.data);
     } catch (error) {
       setUser(null);
@@ -42,7 +50,7 @@ export const AuthProvider = ({ children }) => {
       setUser(response.data.user);
       // Store token in localStorage as backup
       if (response.data.token) {
-        localStorage.setItem('token', response.data.token);
+        localStorage.setItem('authToken', response.data.token);
       }
       return { success: true, data: response.data };
     } catch (error) {
@@ -63,7 +71,7 @@ export const AuthProvider = ({ children }) => {
       setUser(response.data.user);
       // Store token in localStorage as backup
       if (response.data.token) {
-        localStorage.setItem('token', response.data.token);
+        localStorage.setItem('authToken', response.data.token);
       }
       return { success: true, data: response.data };
     } catch (error) {
@@ -119,7 +127,7 @@ export const AuthProvider = ({ children }) => {
       console.error('Logout error:', error);
     } finally {
       setUser(null);
-      localStorage.removeItem('token');
+      localStorage.removeItem('authToken');
     }
   };
 

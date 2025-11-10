@@ -9,7 +9,15 @@ const PrivateRoute = ({ children, requiredRole = null }) => {
     return <div>Loading...</div>;
   }
 
-  if (!user) {
+  // If there's no token stored, treat as unauthenticated
+  let token = null;
+  try {
+    token = localStorage.getItem('authToken');
+  } catch (e) {
+    token = null;
+  }
+
+  if (!user || !token) {
     return <Navigate to="/login" replace />;
   }
 
