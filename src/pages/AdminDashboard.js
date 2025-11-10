@@ -2,7 +2,7 @@ import React, { useEffect, useState, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { rolePermissions, actionLabels } from '../config/rolesConfig';
-import { apiUrl, authFetch } from '../config/api';
+import { authFetch } from '../config/api';
 import './AdminDashboard.css';
 
 const AdminDashboard = () => {
@@ -31,7 +31,7 @@ const AdminDashboard = () => {
       .then(data => setUsers(Array.isArray(data) ? data : (data.users || [])))
       .catch(err => setUsersError(err.message))
       .finally(() => setLoadingUsers(false));
-  }, [authToken]);
+  }, []);
 
   const loadRequests = useCallback(async () => {
     try {
