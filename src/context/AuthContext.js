@@ -35,6 +35,10 @@ export const AuthProvider = ({ children }) => {
       const response = await axiosInstance.get('/api/auth/me');
       setUser(response.data);
     } catch (error) {
+      // If unauthorized, remove stale token
+      if (error?.response?.status === 401) {
+        try { localStorage.removeItem('authToken'); } catch (e) {}
+      }
       setUser(null);
     } finally {
       setLoading(false);
@@ -54,10 +58,16 @@ export const AuthProvider = ({ children }) => {
       }
       return { success: true, data: response.data };
     } catch (error) {
-      return {
-        success: false,
-        error: error.response?.data?.error || 'Login failed'
-      };
+      let message = 'Login failed';
+      if (error?.response) {
+        message = error.response.data?.error || error.response.data?.message || `HTTP ${error.response.status}: ${error.response.statusText}`;
+      } else if (error?.request) {
+        message = 'Network error. Check API base URL and CORS settings.';
+      } else if (error?.message) {
+        message = error.message;
+      }
+      console.error('Login error:', error);
+      return { success: false, error: message };
     }
   };
 
@@ -75,10 +85,16 @@ export const AuthProvider = ({ children }) => {
       }
       return { success: true, data: response.data };
     } catch (error) {
-      return {
-        success: false,
-        error: error.response?.data?.error || 'Registration failed'
-      };
+      let message = 'Registration failed';
+      if (error?.response) {
+        message = error.response.data?.error || error.response.data?.message || `HTTP ${error.response.status}: ${error.response.statusText}`;
+      } else if (error?.request) {
+        message = 'Network error. Check API base URL and CORS settings.';
+      } else if (error?.message) {
+        message = error.message;
+      }
+      console.error('Registration error:', error);
+      return { success: false, error: message };
     }
   };
 
