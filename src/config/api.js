@@ -17,6 +17,14 @@ export const axiosInstance = axios.create({
   withCredentials: true
 });
 
+// Dev-time visibility of base URL
+if (process.env.NODE_ENV === 'development') {
+  try {
+    // eslint-disable-next-line no-console
+    console.log('[API] BASE_URL =', API_BASE_URL || '(empty: using relative paths)');
+  } catch {}
+}
+
 // Attach Authorization header automatically from localStorage `authToken` when present
 axiosInstance.interceptors.request.use(
   (config) => {
